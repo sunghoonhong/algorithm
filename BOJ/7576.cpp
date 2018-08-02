@@ -22,10 +22,10 @@ ans = -1 일때: 전부를 채우지 못했을때.
 */
 
 bool complete(vector<vector<int> > &g) {
-    int m = g.size();
-    int n = g[0].size();
-    for(int i=0; i<m; ++i) {
-        for(int j=0; j<n; ++j) {
+    int n = g.size();
+    int m = g[0].size();
+    for(int i=0; i<n; ++i) {
+        for(int j=0; j<m; ++j) {
             if(g[i][j]==0) {
                 return false;
             }
@@ -37,11 +37,11 @@ bool complete(vector<vector<int> > &g) {
 int bfs(vector<vector<int> > &g) {
     queue<pair<int, int> > q;
     int depth = -1;
-    int m=g.size();
-    int n=g[0].size();
-    vector<vector<bool> > visited(m, vector<bool>(n, false));
-    for(int i=0; i<m; ++i) {
-        for(int j=0; j<n; ++j) {
+    int n=g.size();
+    int m=g[0].size();
+    vector<vector<bool> > visited(n, vector<bool>(m, false));
+    for(int i=0; i<n; ++i) {
+        for(int j=0; j<m; ++j) {
             if(g[i][j]==1) {
                 visited[i][j] = true;
                 q.push(make_pair(i,j));
@@ -50,8 +50,8 @@ int bfs(vector<vector<int> > &g) {
     }
     while(!q.empty()) {
         // cout << "Simulation... " << depth << endl;
-        // for(int i=0; i<m; ++i) {
-        //     for(int j=0; j<n; ++j) {
+        // for(int i=0; i<n; ++i) {
+        //     for(int j=0; j<m; ++j) {
         //         cout << g[i][j];
         //     }
         //     cout << endl;
@@ -65,12 +65,12 @@ int bfs(vector<vector<int> > &g) {
             int y = u.second;
             // printf("u: %d,%d\nL: ", x,y);
             if(x>0) if(g[x-1][y]!=-1) link.push_back(make_pair(x-1, y));
-            if(x<m-1) if(g[x+1][y]!=-1) link.push_back(make_pair(x+1, y));
+            if(x<n-1) if(g[x+1][y]!=-1) link.push_back(make_pair(x+1, y));
             if(y>0) if(g[x][y-1]!=-1) link.push_back(make_pair(x, y-1));
-            if(y<n-1) if(g[x][y+1]!=-1) link.push_back(make_pair(x, y+1));
+            if(y<m-1) if(g[x][y+1]!=-1) link.push_back(make_pair(x, y+1));
             
         
-            for(int i=0; i<link.size(); ++i) {
+            for(unsigned int i=0; i<link.size(); ++i) {
                 pair<int, int> t = link[i];
                 // printf("%d,%d ",t.first, t.second);
                 if(!visited[t.first][t.second]) {
@@ -89,10 +89,10 @@ int bfs(vector<vector<int> > &g) {
 
 int main() {
     int n, m;
-    cin >> n >> m;
-    vector<vector<int> > g(m, vector<int>(n));
-    for(int i=0; i<m; ++i) {
-        for(int j=0; j<n; ++j) {
+    cin >> m >> n;
+    vector<vector<int> > g(n, vector<int>(m));
+    for(int i=0; i<n; ++i) {
+        for(int j=0; j<m; ++j) {
             cin >> g[i][j];
         }
     }    
