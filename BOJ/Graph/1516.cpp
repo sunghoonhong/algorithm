@@ -9,7 +9,6 @@
 #include <utility>
 #include <algorithm>
 #include <cmath>
-#include <inttypes.h>
 
 using namespace std;
 
@@ -37,37 +36,61 @@ inline void putInt(int n) { printf("%d", n); }
 inline void enter() {putchar('\n');}
 
 /*
-    각 건물마다 건물의 진입간선들만을 따라가는 dfs 탐색을 하자.
+    각 건물마다 dfs로 끝점리스트(from)를 구하고,
+    끝점리스트의 각 정점을 시작점,
+    현재 건물을 끝점으로 해서 다익스트라로 풀어보자.
 */
 
 
-void adfs(int v, vvint &in, vvint &out, vbool &visited, vint &ans) {
+void adfs(int v, vvint &in, vvint &out, vbool &visited, vint &ans, vvint &from, int start=-1) {
     visited[v] = true;
+    if(in[v].empty()) {
+        start = v;
+    }
     for(unsigned int i=0; i<in[v].size(); ++i) {
         if(!visited[in[v][i]]) {
-            adfs(in[v][i], in, out, visited, ans);
+            adfs(in[v][i], in, out, visited, ans, from, start);
         }
     }
+    if(start!=-1) from[start].push_back(v);
     ans.push_back(v);
 }
 
-vint dfs(int v, vvint in, vvint out) {
+vvint dfs(int v, vvint in, vvint out) {
     vint ans;
     vbool visited(in.size(), false);
-    adfs(v, in, out, visited, ans);
-    return ans;
+    vvint from(in.size());
+    adfs(v, in, out, visited, ans, from);
+    for(int i=0; i<from.size(); ++i) {
+        if(!from[i].empty()) {
+            printf("start from %d: ", i+1);
+            for(int j=0; j<from[i].size(); ++j) {
+                putInt(from[i][j]+1); putchar(' ');
+            }
+            enter();
+        }
+    }
+    return from;
 }
+
 int ts(int v, vvint in, vvint out, vint& cost) {
-    vint list = dfs(v, in, out);
+    vvint lists = dfs(v, in, out);
     int ans = 0;
     // cout << "DFS: ";
-    for(unsigned int i=0; i<list.size(); ++i) {
-        // putInt(list[i]);
-        // putchar(' ');
-        ans += cost[list[i]];
+    for(unsigned int i=0; i<lists.size(); ++i) {
+        if(!lists[i].empty()) {
+            int temp = 0;
+            printf("costs from %d... ", i+1);
+            for(unsigned int j=0; j<lists[i].size(); ++j) {
+                putInt(lists[i][j]+1); putchar(' ');
+                temp += cost[lists[i][j]];
+            }
+            putInt(temp);
+            if(ans<temp) ans=temp;
+            enter();
+        }
     }
-    // enter();
-    return ans;
+    return ans+cost[v];
 }
 
 int main() {
@@ -82,7 +105,7 @@ int main() {
         }
     }
     for(int i=0; i<n; ++i) {
-        // printf("dfs... %d\n",i);
+        printf("dfs... %d\n",i+1);
         putInt(ts(i, in, out, cost));
         enter();
     }
