@@ -43,11 +43,11 @@ int main() {
     for(int i=0, x,y; i<n; ++i) {
         x=getInt();
         y=getInt();
-        vec[i]=point(y,x);
+        vec[i]=point(x,y);
     }
     sort(vec.begin(), vec.end());
     for(int i=0; i<n; ++i) {
-        printf("%d %d\n", vec[i].second, vec[i].first);
+        printf("%d %d\n", vec[i].first, vec[i].second);
     }
     return 0;
 }
