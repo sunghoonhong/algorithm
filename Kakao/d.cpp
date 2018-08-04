@@ -36,91 +36,52 @@ inline void putInt(int n) {printf("%d", n);}
 inline void enter() {putchar('\n');}
 
 
-typedef pair<ll, ll> P2;
-
+typedef pair<int, int> P2;
+typedef vector<P2> vP2;
 void putP(P2 a) {printf("(%lld, %lld)",a.first,a.second);}
 
-bool equal(P2 a, P2 b) {return a.first==b.first && a.second==b.second;}
-
-ll d2(P2 a, P2 b) {
+int d2(P2 a, P2 b) {
     return (a.first-b.first)*(a.first-b.first)+(a.second-b.second)*(a.second-b.second);
 }
 
-bool possible(P2 b, P2 e, ll x, vector<P2> &cp) {
-    P2 vert = make_pair(e.first, b.second);
-    P2 hori = make_pair(b.first, e.second);
-    printf("x: %d\n", x);
-    if(x==0) {
-        putP(b); cout << "->"; putP(e); cout << ' ' << (b.first==e.first||b.second==e.second) << endl;
-        if(b.first==e.first || b.second==e.second) {
-            return true;
-        }
-        else {
-            cout << "check nearby checkpoint\n";
-            for(unsigned int i=0; i<cp.size(); ++i) {
-                if(cp[i]!=b) {
-                    if(cp[i]==vert || cp[i]==hori) {
-                        putP(cp[i]); cout << "... \n";
-                        return possible(cp[i], e, x, cp);
-                    }
-                }
-            }
-        }
+int diff(int x) {return x>0?x:-x;}
+bool direct(P2 a, P2 b, ll x) {
+    return diff(a.first-b.first)<=x || diff(a.second-b.second)<=x;
+}
+
+bool possible(int B, int E, int x, vP2 &list, vBool &visited) {
+    P2 b=list[B], e=list[E];
+    visited[E] = true;
+    // cout << x  << ' '; putP(b); putchar(' '); putP(e); cout << endl;
+    if(direct(b,e,x)) {
+        return true;
     }
-    else{
-        cout << d2(b,e) << ' ' << d2(b,vert) << ' ' << d2(b,hori) << ' ' << x*x << endl;
-        if(d2(b, e) <= x*x) {return true;}
-        else {
-            if(d2(b, vert) < x*x) {
-                // e가 있는 수직선으로 갈수있는가?
-                cout << "check vertical\n";
-                for(unsigned int i=0; i<cp.size(); ++i) {
-                    if(cp[i]!=vert) {
-                        if(possible(vert,cp[i],0,cp)) {
-                            return possible(cp[i], e, x, cp);
-                        }
-                    }
+    else {
+        for(unsigned int i=0; i<list.size(); ++i) {
+            if(!visited[i] && direct(list[i], e, x)) {
+                if(possible(B, i, x, list, visited)) {
+                    return true;
                 }
-            }
-            else if(d2(b, hori) < x*x) {
-                // e가 있는 수평선으로 갈수있는가?
-                cout << "check horizontal\n";
-                for(unsigned int i=0; i<cp.size(); ++i) {
-                    if(cp[i]!=hori) {
-                        if(possible(hori,cp[i],0,cp)) {
-                            return possible(cp[i], e, x, cp);
-                        }
-                    }
-                }
-            }
-            else {
-                // e로 직접 또는 수직 수평선에 갈 수 없다.
-                // 그럼 부스터만으로는 갈 수 있는가?
-                cout << "check booster\n";
-                return possible(b, e, 0, cp);
             }
         }
+        return false;
     }
-    return false;
 }
 
 int main() {
-    ll n,q;
+    int n,q;
     n=getInt(); q=getInt();
-    vector<P2> cp(n);
-    for(ll i=0,a,b; i<n; ++i) {
+    vP2 list(n);
+    for(int i=0,a,b; i<n; ++i) {
         a=getInt(); b=getInt();
-        cp[i] = make_pair(a,b);
-        putP(cp[i]);
-        enter();
+        list[i] = make_pair(a,b);
     }
-    for(ll i=0,a,b,x; i<q; ++i) {
+    for(int i=0,a,b,x; i<q; ++i) {
+        vBool visited(n, false);
         a=getInt()-1;
         b=getInt()-1;
         x=getInt();
-        if(possible(cp[a],cp[b],x, cp)) {
-            printf("YES\n");
-        }
+        if(possible(a,b,x,list,visited)) printf("YES\n");
         else printf("NO\n");
     }
     return 0;
