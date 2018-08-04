@@ -35,6 +35,24 @@ inline ull getULL() {ull n; scanf("%llu", &n); return n;}
 inline void putInt(int n) {printf("%d", n);}
 inline void enter() {putchar('\n');}
 
+/*
+    (b,e,x) 
+    1.직접 갈 수 있나? (걷기,부스터모두)(직접: 다른 체크포인트를 거치지않음)
+    2.아니면, e로 직접갈수있는 다른 체크포인트들 중 직접 갈 수 있는 곳이있나?
+    3.아니면 갈수없다.
+
+    N < 250000인데,
+    다른체크포인트 체크하는 부분에서 루프와 재귀가 있다.
+    각각 최대 N의 복잡도가 있어서 총 O(N^2)이 된다.
+    일단 방문체크를 해서 줄여보려고 했다.
+    TODO:
+    생각해보니 점을 미리 정렬해두면 검색할때 빨리 성공하지 않을까?
+    점(체크포인트) 개수는 최대 250000인데, 퀵소트로 하면 O(NlogN)이니까
+    시간엔 안걸릴거같다.
+    근데 그게 꼭 근처라는 보장도없고.
+    근처라해도 어덯게 검색순서등이 고민이된다.
+
+*/
 
 typedef pair<int, int> P2;
 typedef vector<P2> vP2;
@@ -46,7 +64,10 @@ int d2(P2 a, P2 b) {
 
 int diff(int x) {return x>0?x:-x;}
 bool direct(P2 a, P2 b, ll x) {
-    return diff(a.first-b.first)<=x || diff(a.second-b.second)<=x;
+    if(x==0) {
+        return a.first==b.first || a.second==b.second;
+    }
+    return diff(a.first-b.first)<x || diff(a.second-b.second)<x;
 }
 
 bool possible(int B, int E, int x, vP2 &list, vBool &visited) {
