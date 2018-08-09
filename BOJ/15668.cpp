@@ -41,18 +41,21 @@ inline void putInt(int n) {printf("%d", n);}
 inline void enter() {putchar('\n');}
 
 /*
-    divide(index, n, seen, cases) :
-        n을 앞부터 볼때, index번째부터 본 숫자가 나눠질수있는지?
-        지금 확인하는게 첫째자리면(index=0) 지금 자리가 서로 다른 두 자연수로 더해서 만들수 있는지.
-        둘째자리라면(index=1) 그리고 첫째자리가 1이라면 더해서 carry가 생기는(두자연수를 더했을때 10이상이되는) 경우만을 확인.
-
-        divide(index-1, n) && check(n[index])
+    divide(n): n을 서로다른 두 자연수를 더해서 만들 수 있는가?
+    divide(n) = {
+        n=0: true;
+        n<20: check(n);
+        divide(n/10) & check(n%10)
         or
-        divide(index-1, n에서 index-1자리에서 1뺸 수) && check(n[index]+10))
+        divide((n-10)/10) & check(n%10+10)
+    }
 
-    - 문제점: carry가 넘어가는 경우를 확인할때 index가 제대로 붙지않는다.
-    ex) div(20,1) = div(20,0)&check(0) || div(10,0)&check(10)
-    인데 div(10,1)&check(10)로 되는게 맞다. index를 예외처리해야하는게 불편하다.
+     - 해결과제: check할때 0이 실제 0인지 아닌지 구분필요!
+     ex) 54321 = 54320+1이 안됨. 이유는 54320 + 00001이되면
+     (0,5),(0,4),(0,3),(0,2),(0,1)
+     이렇게 되면 0이 계속 포함되버린다.
+     게다가 위에서 (0,1)말고 (1,0)으로하면 딱 좋은데,
+     그런 순서를 정하는 것도 필요하다.
 */
 
 typedef vector<vector<pair<int, int> > > Cases;
@@ -70,8 +73,8 @@ vInt itov(int n) {
 
 int vtoi(vInt &v) {
     int num = 0;
-    int pow = v.size()-1;
-    for(uint i=0; i<v.size(); ++i, pow/=10) {
+    int pow = 1;
+    for(int i=v.size()-1; i>=0; --i, pow*=10) {
         num += v[i]*pow;
     }
     return num;
@@ -83,96 +86,60 @@ int pow10(int i) {
     return ret;
 }
 
-bool check(int digit, vBool &seen, Cases &cases, pair<int, int> &p) {
-    
+bool check(int digit, vBool &seen, Cases &cases, vInt &ans) {
     // printf("check %d\n", digit);
     // printf("seen\n");for(int i=0; i<10; ++i)printf("[ %d ]: %d\n",i,(int)seen[i]);
     for(int j=0; j<cases[digit].size(); ++j) {
-        if(!(seen[cases[digit][j].first]|seen[cases[digit][j].second])) {
-            p = cases[digit][j];
-            seen[p.first]=true;
-            seen[p.second]=true;
-            // printf("%d %d\n", p.first, p.second);
-            return true;
+        if(!seen[cases[digit][j].second]) {
+            if(ans.size()>0 && ans[0]>0 && digit<10) {
+                if(j==0) continue;
+            }
+            if(!seen[cases[digit][j].first]) {
+                pair<int,int> p = cases[digit][j];
+                seen[p.first]=true;
+                seen[p.second]=true;
+                ans.push_back(p.first);
+                // printf("%d %d\n", p.first, p.second);
+                return true;
+            }
         }
     }
     // printf("fail\n");
     return false;
 }
 
-int divide(int index, int n, vBool &seen, Cases &cases) {
-    vInt num = itov(n);
-    int end = num.size()-1;
-    // printf("num: ");for(int i=0; i<num.size(); ++i) printf("%d",num[i]); enter();
-    if(index<0) index++;
-    int digit = num[index];
-    // printf("%d째자리 %d을 체크하자\n",index, digit);
-    pair<int, int> correct;
+int divide(int n, vBool &seen, Cases &cases, vInt &ans) {
     vBool tempseen(seen);
-    int ans;
-    if(index==0) {
-        // 지금이 맨 앞자리다.
-        tempseen = seen;
-        if(digit==0) {
-            // printf("%d째자리 0 성공!\n", index);
-            return 0;
-        }
-        else if(check(digit, tempseen, cases, correct)) {
+    vInt tempans(ans);
+
+    if(n==0) return true;
+    if(n<18) {
+        if(check(n, tempseen, cases, tempans)) {
             seen = tempseen;
-            // printf("%d째자리 성공!\n", index);
-            return correct.first*pow10(end-index);
+            ans = tempans;
+            return true;
         }
-        else {
-            // printf("%d째자리 실패...\n", index);
-            return -1;
-        }
+        else return false;
     }
-    if(index==1) {
-        // 지금이 앞에서 두번째 자리다.
-        tempseen = seen;
-        if(num[0]==1 && check(digit+10, tempseen, cases, correct)) {
+    int ret = divide(n/10, tempseen, cases, tempans);
+    if(ret) {
+        if(check(n%10, tempseen, cases, tempans)) {
             seen = tempseen;
-            // printf("%d째자리 10이상 성공!\n", index);
-            return correct.first*pow10(end-index);
+            ans = tempans;
+            return true;
         }
-        // else {
-        //     ans = divide(index-1, n, seen, cases);
-        //     if(ans>-1) {
-        //         tempseen = seen;
-        //         if(check(digit, tempseen, cases, correct)) {
-        //             seen = tempseen;
-        //             printf("%d째자리 10이하 성공!\n", index);
-        //             ans+=correct.first*pow10(num.size()-1-index);
-        //             return ans;
-        //         }
-        //     }
-        //     printf("%d째자리 실패...\n", index);
-        //     return -1;
-        // }
     }
     tempseen = seen;
-    ans = divide(index-1, n, tempseen, cases);
-    if(ans>-1) {
-        if(check(digit, tempseen, cases, correct)) {
+    tempans = ans;
+    ret = divide(n/10-1, tempseen, cases, tempans);
+    if(ret) {
+        if(check(n%10+10, tempseen, cases, tempans)) {
             seen = tempseen;
-            // printf("%d째자리 10이하 성공!\n", num.size()-index);
-            ans+=correct.first*pow10(end-index);
-            return ans;
+            ans = tempans;
+            return true;
         }
-        // printf("%d째자리 10이하 실패...\n", num.size()-index);
     }
-    tempseen = seen;
-    ans = divide(index-1, n-pow10(end+1-index), tempseen, cases);
-    if(ans>-1) {
-        if(check(digit+10, tempseen, cases, correct)) {
-            seen = tempseen;
-            // printf("%d째자리 10이상 성공!\n", num.size()-index);
-            ans+=correct.first*pow10(end-index);
-            return ans;
-        }
-        // printf("%d째자리 10이상 실패...\n", num.size()-index);
-    }
-    return -1;
+    return false;
 }
 
 int main() {
@@ -204,14 +171,19 @@ int main() {
     //     enter();
     // }
     vBool seen(10, false);
-    int ans = divide(itov(n).size()-1, n, seen, cases);
+    vInt ans;
+    bool possible = divide(n, seen, cases, ans);
+    // for(uint i=0; i<ans.size(); ++i) {printf("%d ",ans[i]);}enter();
     // printf("seen\n");for(int i=0; i<10; ++i)printf("[ %d ]: %d\n",i,(int)seen[i]);
-    if(ans==-1) {
+    if(!possible) {
         putInt(-1);
         return 0;
     }
-    putInt(ans);
-    printf(" + ");
-    putInt(n-ans);
+    else {
+        int first = vtoi(ans);
+        putInt(first);
+        printf(" + ");
+        putInt(n-first);
+    }
     return 0;
 }
