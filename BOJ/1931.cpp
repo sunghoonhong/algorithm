@@ -50,30 +50,30 @@ inline void enter() {putchar('\n');}
     N<=10^6
     가장 빨리 끝나는 회의부터 고르자.
     끝이 같으면 시작이 더 빠른걸 고르자.
-*/
 
-// const int MAX=100002;
-struct conf {
-    int s,e;
-    bool operator <(const conf &a) const{
-        if(this->e == a.e) return this->s < a.s;
-        return this->e < a.e;
-    }
-};
-vector<conf> confs;
+    # 의문
+    이전에 제출한 코드는 왜 틀렸을까?
+    완전히 같은 알고리즘이다.
+    혹시나 해서 <말고도 > == 도 추가해봤고,
+    그냥 compare함수를 sort()에 줘보기도 했는데,
+    전부 오답이었다.
+    아니면 입력받는 부분에서 getInt()를 쓰면 안되는건가?
+*/
 
 int main() {
     int n = getInt();
-    confs.reserve(n);
-    for(int i=0; i<n; ++i) {
-        confs[i]={getInt(), getInt()};
+    vector<pair<int, int> > confs(n);
+    for(int i=0,s,e; i<n; ++i) {
+        s=getInt(); e=getInt();
+        confs[i]=make_pair(e,s);
     }
     sort(confs.begin(), confs.end());
     int bound = -1, ans = 0;
     for(int i=0; i<n; ++i) {
-        if(bound <= confs[i].s) {
-            // printf("%d ~ %d\n",confs[i].s,confs[i].e);
-            bound = confs[i].e;
+        // printf("%d ~ %d\n",confs[i].second,confs[i].first);
+        if(bound <= confs[i].second) {
+            // printf("%d ~ %d\n",confs[i].second,confs[i].first);
+            bound = confs[i].first;
             ans++;
         }
     }
