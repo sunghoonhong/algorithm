@@ -48,12 +48,16 @@ inline void enter() {putchar('\n');}
     0~n의 원소 1개의 집합이 n+1개 있을때,
     Union과 Find를 구현하라.
 
-    n < 10^6
+    n < 10^6    m < 10^5
 
     weigth를 고려한 union으로 원소가 적은 집합이 원소가 많은 집합에 합쳐짐.
     각 set의 head마다 그 집합의 마지막 원소를 저장하는 last를 추가.
     원소가 많은 집합은 tail로 연결해서 탐색할 필요없이 last만 검색.
     원소가 적은 집합은 tail로 순회하며 각 원소의 head를 갱신해준다.
+
+    head와 tail을 사용한 연결리스트로 구현했는데,  -> O(m+nlogn)
+    이것보단 parent를 가리키는 트리로 만들어서
+    경로압축을 포함한 find를 사용하는 것이 훨씬 나은듯하다 ->O(mlog*n)
 */
 
 struct element {
