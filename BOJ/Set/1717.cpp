@@ -50,33 +50,64 @@ inline void enter() {putchar('\n');}
 
     n < 10^6
 
-    시간초과로 오답...
-
+    weigth를 고려한 union으로 원소가 적은 집합이 원소가 많은 집합에 합쳐짐.
+    각 set의 head마다 그 집합의 마지막 원소를 저장하는 last를 추가.
+    원소가 많은 집합은 tail로 연결해서 탐색할 필요없이 last만 검색.
+    원소가 적은 집합은 tail로 순회하며 각 원소의 head를 갱신해준다.
 */
+
+struct element {
+    int head, tail, weight;
+};
+vector<element> djset;
+vInt last;
 int n;
-vInt parent;
 
 bool find_set(int a, int b) {
-    while(a!=parent[a]) a=parent[a];
-    while(b!=parent[b]) b=parent[b];
-    return a==b;
+    return djset[a].head==djset[b].head;
+}
+
+void swap(int &a, int &b) {
+    int t = a; a = b; b = t;
+}
+
+void printE(element &a) {
+    printf("%d %d %d\n", a.head, a.tail, a.weight);
 }
 
 void union_set(int a, int b) {
-    while(a!=parent[a]) a=parent[a];
-    while(b!=parent[b]) b=parent[b];
-    if(a!=b) parent[b]=a;
+    int ha = djset[a].head;
+    int hb = djset[b].head;
+    int wa = djset[ha].weight;
+    int wb = djset[hb].weight;
+    if(ha!=hb) {
+        if(wa<wb) {
+            swap(ha, hb);
+        }
+        int t = ha;
+        if(last[t]!=-1) t = last[ha];
+        djset[t].tail = hb;
+        for(t = hb; djset[t].tail!=-1; t=djset[t].tail) {
+            djset[t].head = ha;
+        }
+        djset[t].head = ha;
+        last[ha] = t;
+        djset[ha].weight+=djset[hb].weight;
+    }
 }
 
 int main() {
     n = getInt();
     int m = getInt();
-    parent.resize(n+1);
+    djset.resize(n+1);
+    last.resize(n+1);
     for(int i=0; i<n+1; ++i) {
-        parent[i]=i;
+        djset[i]={i,-1, 1};
+        last[i] = -1;
     }
     int op, a, b;
     while(m--) {
+        // for(int i=0; i<n+1; ++i) { printf("%d: ",i); printE(djset[i]); }
         op=getInt();
         a=getInt();
         b=getInt();
