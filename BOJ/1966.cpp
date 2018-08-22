@@ -70,36 +70,33 @@ int gcd(int a, int b) {
     해결)
     그냥 큐로 직접 시뮬레이션 해보자.
     중요도의 최댓값은 미리 중요도를 내림차순 정렬해놓고 인덱스를 바꾸는 것으로 계산하자
+
+    개선)
+    큐로 해도 되지만, 그냥 배열로 해도 문제없다.
+    어차피 큐의 상태가 중요한게 아니라 인쇄되는 순서만 고려하면된다.
+    0번째 원소부터 차례로 보면서
+    인덱스가 n보다 커질 경우에 다시 n을 빼주거나, %n으로 계속 할 수 있게 해줘도된다.
+
 */
 
 int main() {
     int t = getInt();
     while(t--) {
         int n = getInt(), m = getInt();
-        queue<int> q;
-        int a[101];
+        int a[101], mx[101];
         for(int i=0; i<n; ++i) {
             a[i] = getInt();
-            q.push(a[i]);
+            mx[i] = a[i];
         }
-        int maxidx=0;
-        sort(a,a+n, greater<int>() );
-        int ans=0;
-        while(1) {
-            // cout << m << ' ';
-            if(q.front() == a[maxidx]) {
-                if(m==0) break;
-                q.pop();
-                m--; maxidx++;
+        int maxidx=n-1, ans=0;
+        sort(mx,mx+n);
+        for(int i=0; i<n; ++i) {
+            if(a[i]==mx[maxidx]) {
+                if(i==m) break;
+                maxidx--;
                 ans++;
             }
-            else {
-                int tmp = q.front();
-                q.pop();
-                q.push(tmp);
-                if(m==0) m=q.size()-1;
-                else m--;
-            }
+            if(i==n-1) i-=n;
         }
         putInt(ans+1); enter();
     }
